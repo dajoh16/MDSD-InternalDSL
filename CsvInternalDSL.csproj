@@ -56,6 +56,15 @@
     <Compile Include="Data\ReportableData.cs" />
     <Compile Include="Data\TwrSeriesReportableData.cs" />
     <Compile Include="LogFactory.cs" />
+    <Compile Include="MetaModel\EntityField.cs" />
+    <Compile Include="MetaModel\EntityList.cs" />
+    <Compile Include="MetaModel\EntityNumberField.cs" />
+    <Compile Include="MetaModel\EntityObject.cs" />
+    <Compile Include="MetaModel\EntityStringField.cs" />
+    <Compile Include="MetaModel\Header.cs" />
+    <Compile Include="ModelBuilder\CsvModelBuilder.cs" />
+    <Compile Include="ModelBuilder\Interfaces\Builder.cs" />
+    <Compile Include="ModelBuilder\Interfaces\ObjectBuilder.cs" />
     <Compile Include="Orchestrator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

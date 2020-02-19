@@ -5,6 +5,8 @@ using System.Linq;
 using log4net;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
+using LossDataExtractor.MetaModel;
+using LossDataExtractor.ModelBuilder;
 
 namespace LossDataExtractor
 {
@@ -13,6 +15,18 @@ namespace LossDataExtractor
         private static ILog logger = LogFactory.GetLogInstance("MAIN");
         public static void Main(string[] args)
         {
+            var builder = CsvModelBuilder.GetBuilder();
+            var model = builder.Header("Csv.csv").
+                                    Object().
+                                        String("PortfolioId").
+                                        String("ClientId").
+                                        Number("LossResultId").
+                                        String("AsOfDate").
+                                        Number("ReturnPct").
+                                        Build();
+
+
+            /*
             var rootAppender = ((Hierarchy)LogManager.GetRepository())
                 .Root.Appenders.OfType<FileAppender>()
                 .FirstOrDefault();
@@ -24,6 +38,7 @@ namespace LossDataExtractor
             Console.WriteLine("Loss Data Extraction Complete. Press Enter to close.");
             logger.Info("Loss Data Extraction Complete.");
             Console.ReadKey(true);
+            */
         }
     }
 }
