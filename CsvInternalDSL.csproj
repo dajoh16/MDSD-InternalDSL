@@ -65,6 +65,7 @@
     <Compile Include="ModelBuilder\CsvModelBuilder.cs" />
     <Compile Include="ModelBuilder\Interfaces\Builder.cs" />
     <Compile Include="ModelBuilder\Interfaces\ObjectBuilder.cs" />
+    <Compile Include="ModelBuilder\InternalObjectBuilder.cs" />
     <Compile Include="Orchestrator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

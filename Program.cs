@@ -24,7 +24,23 @@ namespace LossDataExtractor
                                         String("AsOfDate").
                                         Number("ReturnPct").
                                         Build();
-
+            
+            var model2 = builder.Header("Csv.csv").
+                                    Object().
+                                        String("PortfolioId").
+                                        String("ClientId").
+                                        Number("LossResultId").
+                                        String("AsOfDate").
+                                        Number("ReturnPct").
+                                            Object("TwrSeries").
+                                                String("SecId").
+                                                Number("AccPeriodBasTwrAtMarketPrice").
+                                                    Object("-Object3-").
+                                                        String("Test").
+                                                            Object("-Object4-").
+                                                                String("Test4").
+                                                Build();
+            Console.WriteLine("Finished");
 
             /*
             var rootAppender = ((Hierarchy)LogManager.GetRepository())
