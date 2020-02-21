@@ -32,30 +32,32 @@ namespace LossDataExtractor
                             Build();
             var model2 = builder.Header("Csv.csv").
                 Object().
-                String("PortfolioId").
-                String("ClientId").
-                Number("LossResultId").
-                String("AsOfDate").
-                Number("ReturnPct").
-                Object("NestedObject").String("NestedObjectDesc").Number("NestedObjectValue").
-                Build();
-            var model3 = builder.Header("Csv.csv").
-                Object().
-                String("PortfolioId").
-                String("ClientId").
-                Number("LossResultId").
-                String("AsOfDate").
-                Number("ReturnPct").
-                    List("TwrSeries").
-                        String("SecId").
-                        Number("AccPeriodBasTwrAtMarketPrice").
-                        List("NestedObjList").
+                    String("PortfolioId").
+                    String("ClientId").
+                    Number("LossResultId").
+                    String("AsOfDate").
+                    Number("ReturnPct").
+                        Object("NestedObject").
                             String("NestedObjectDesc").
                             Number("NestedObjectValue").
+                    Build();
+            var model3 = builder.Header("Csv.csv").
+                Object().
+                    String("PortfolioId").
+                    String("ClientId").
+                    Number("LossResultId").
+                    String("AsOfDate").
+                    Number("ReturnPct").
+                        List("TwrSeries").
+                            String("SecId").
+                            Number("AccPeriodBasTwrAtMarketPrice").
+                                List("NestedObjList").
+                                    String("NestedObjectDesc").
+                                    Number("NestedObjectValue").
                 Build();
             var reportableData = GenerateReportableData();
             var writer = new CSVWriter();
-            writer.WriteToFile<ReportableData>(reportableData,model3);
+            writer.WriteToFile(reportableData,model3);
         }
         
         private static IEnumerable<ReportableData> GenerateReportableData()
