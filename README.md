@@ -1,6 +1,6 @@
 In this repository i have created a program that can write any complex object structure into a comma separated file, by using the internal DSL. An example of the internal DSL:
 ``` CSharp
-var model = builder.Header("Csv.csv").
+var model = builder.Header("NestedListInList.csv").
                 Object().
                     String("PortfolioId").
                     String("ClientId").
@@ -46,20 +46,10 @@ To run the application simply go into
 
 MDSD-InternalDSL\bin\Release
 
-And run the CsvInternalDSL.exe file. Which will generate a Csv.csv file, with the model specified at the top of this document.
+And run the CsvInternalDSL.exe file. Which will generate 3 sample .csv files. 
+The program.cs file contains the multiple models that are written to the csv files, based on the same complex object structure.
 
 Otherwise, simply open the solution and build it.
-
-The program.cs file contains multiple models that can be written to a csv file, simply change the input of Line 60 from 
-
-```
-writer.WriteToFile(reportableData,model3);
-```
-To any of the other models
-
-```
-writer.WriteToFile(reportableData,model2);
-```
 
 ## Note on the Builder + Writer
 

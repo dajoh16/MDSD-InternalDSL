@@ -18,7 +18,7 @@ namespace LossDataExtractor
         public static void Main(string[] args)
         {
             var builder = CsvModelBuilder.GetBuilder();
-            var model = builder.Header("Csv.csv").
+            var model = builder.Header("SimpleList.csv").
                 Object().
                     String("PortfolioId").
                     String("ClientId").
@@ -29,7 +29,7 @@ namespace LossDataExtractor
                             String("SecId").
                             Number("AccPeriodBasTwrAtMarketPrice").
                             Build();
-            var model2 = builder.Header("Csv.csv").
+            var model2 = builder.Header("NestedObject.csv").
                 Object().
                     String("PortfolioId").
                     String("ClientId").
@@ -40,7 +40,7 @@ namespace LossDataExtractor
                             String("NestedObjectDesc").
                             Number("NestedObjectValue").
                     Build();
-            var model3 = builder.Header("Csv.csv").
+            var model3 = builder.Header("NestedListInList.csv").
                 Object().
                     String("PortfolioId").
                     String("ClientId").
@@ -56,6 +56,8 @@ namespace LossDataExtractor
                 Build();
             var reportableData = GenerateReportableData();
             var writer = new CSVWriter();
+            writer.WriteToFile(reportableData,model);
+            writer.WriteToFile(reportableData,model2);
             writer.WriteToFile(reportableData,model3);
         }
         
