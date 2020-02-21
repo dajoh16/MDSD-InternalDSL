@@ -73,12 +73,12 @@ namespace LossDataExtractor.Writer
                         entries.Add(dataType.GetProperty(field.FieldName)?.GetValue(item).ToString());
                     } else if (field is EntityObject)
                     {
-                        Type dataType = typeof(T);
+                        Type dataType = item.GetType();
                         dynamic nestedObj = dataType.GetProperty(field.FieldName)?.GetValue(item);
                         entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj, writer));
                     } else if (field is EntityList)
                     {
-                        Type dataType = typeof(T);
+                        Type dataType = item.GetType();
                         var listProp = dataType.GetProperty(field.FieldName);
                         entries.Add(WriteListEntry(entries,listProp,item, (EntityList) field, writer));
                     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using log4net;
 
 
@@ -13,5 +14,6 @@ namespace LossDataExtractor.Data
         public double EopBasHoldingValueAtMarketPrice { get; set; }
         public double PeriodBasTwr { get; set; }
 
+        public List<NestedObject> NestedObjList { get; set; }
     }
 }

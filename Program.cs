@@ -39,9 +39,23 @@ namespace LossDataExtractor
                 Number("ReturnPct").
                 Object("NestedObject").String("NestedObjectDesc").Number("NestedObjectValue").
                 Build();
+            var model3 = builder.Header("Csv.csv").
+                Object().
+                String("PortfolioId").
+                String("ClientId").
+                Number("LossResultId").
+                String("AsOfDate").
+                Number("ReturnPct").
+                    List("TwrSeries").
+                        String("SecId").
+                        Number("AccPeriodBasTwrAtMarketPrice").
+                        List("NestedObjList").
+                            String("NestedObjectDesc").
+                            Number("NestedObjectValue").
+                Build();
             var reportableData = GenerateReportableData();
             var writer = new CSVWriter();
-            writer.WriteToFile<ReportableData>(reportableData,model);
+            writer.WriteToFile<ReportableData>(reportableData,model3);
         }
         
         private static IEnumerable<ReportableData> GenerateReportableData()
@@ -83,7 +97,22 @@ namespace LossDataExtractor
             twr.PeriodBasTwr = 200.0;
             twr.AccPeriodBasTwrAtMarketPrice = 100;
             twr.EopBasHoldingValueAtMarketPrice = 10.0;
+            twr.NestedObjList = GenerateNestedObjList();
             return twr;
+        }
+
+        private static List<NestedObject> GenerateNestedObjList()
+        {
+            var list = new List<NestedObject>();
+            for (int i = 0; i < 5; i++)
+            {
+                var nest = new NestedObject();
+                nest.NestedObjectDesc = "Some Desc of a Nested Obj";
+                nest.NestedObjectValue = i;
+                list.Add(nest);
+            }
+
+            return list;
         }
     }
 }
