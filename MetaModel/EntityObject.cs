@@ -6,7 +6,7 @@ namespace LossDataExtractor.MetaModel
     {
         public List<EntityField> EntityFields { get; set; }
         
-        public string FieldName { get; set; }
+        
 
         public EntityObject(string fieldName) : this()
         {
@@ -16,6 +16,17 @@ namespace LossDataExtractor.MetaModel
         public EntityObject()
         {
             EntityFields = new List<EntityField>();
+        }
+
+        public override string ToString()
+        {
+            var str = $"Object : {FieldName}";
+            foreach (var entityField in EntityFields)
+            {
+                str += $"\n EntityField : {entityField.ToString()}";
+            }
+
+            return str;
         }
     }
 }

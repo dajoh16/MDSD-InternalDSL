@@ -10,5 +10,10 @@
         {
             FileName = fileName;
         }
+
+        public override string ToString()
+        {
+            return $"Csv Meta Model \n FileName: {FileName} \n {RootObject.ToString()}";
+        }
     }
 }

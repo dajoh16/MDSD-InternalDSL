@@ -47,14 +47,12 @@ namespace LossDataExtractor.ModelBuilder
 
         public ObjectBuilder List(string FieldName)
         {
-            throw new System.NotImplementedException();
+            var builder = new InternalListBuilder(this,FieldName);
+            _currentFields.Add(builder.GetList());
+            return builder;
         }
 
-        public ObjectBuilder EndList(string FieldName)
-        {
-            throw new System.NotImplementedException();
-        }
-
+       
         public Header Build()
         {
             _entityObject.EntityFields = _currentFields;

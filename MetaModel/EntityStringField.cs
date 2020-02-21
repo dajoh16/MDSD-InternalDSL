@@ -7,6 +7,11 @@
             FieldName = fieldName;
         }
 
-        public string FieldName { get; set; }
+        
+
+        public override string ToString()
+        {
+            return $"String : {FieldName}";
+        }
     }
 }

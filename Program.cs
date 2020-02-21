@@ -1,12 +1,15 @@
 ﻿
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using log4net;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
+using LossDataExtractor.Data;
 using LossDataExtractor.MetaModel;
 using LossDataExtractor.ModelBuilder;
+using LossDataExtractor.Writer;
 
 namespace LossDataExtractor
 {
@@ -17,44 +20,70 @@ namespace LossDataExtractor
         {
             var builder = CsvModelBuilder.GetBuilder();
             var model = builder.Header("Csv.csv").
-                                    Object().
-                                        String("PortfolioId").
-                                        String("ClientId").
-                                        Number("LossResultId").
-                                        String("AsOfDate").
-                                        Number("ReturnPct").
-                                        Build();
-            
+                Object().
+                    String("PortfolioId").
+                    String("ClientId").
+                    Number("LossResultId").
+                    String("AsOfDate").
+                    Number("ReturnPct").
+                        List("TwrSeries").
+                            String("SecId").
+                            Number("AccPeriodBasTwrAtMarketPrice").
+                            Build();
             var model2 = builder.Header("Csv.csv").
-                                    Object().
-                                        String("PortfolioId").
-                                        String("ClientId").
-                                        Number("LossResultId").
-                                        String("AsOfDate").
-                                        Number("ReturnPct").
-                                            Object("TwrSeries").
-                                                String("SecId").
-                                                Number("AccPeriodBasTwrAtMarketPrice").
-                                                    Object("-Object3-").
-                                                        String("Test").
-                                                            Object("-Object4-").
-                                                                String("Test4").
-                                                Build();
-            Console.WriteLine("Finished");
+                Object().
+                String("PortfolioId").
+                String("ClientId").
+                Number("LossResultId").
+                String("AsOfDate").
+                Number("ReturnPct").
+                Object("NestedObject").String("NestedObjectDesc").Number("NestedObjectValue").
+                Build();
+            var reportableData = GenerateReportableData();
+            var writer = new CSVWriter();
+            writer.WriteToFile<ReportableData>(reportableData,model);
+        }
+        
+        private static IEnumerable<ReportableData> GenerateReportableData()
+        {
+            var toReturn = new List<ReportableData>();
+            for (int i = 0; i <= 10; i++)
+            {
+                var reportableData = new ReportableData();
+                reportableData.ClientId = "Test Client";
+                reportableData.PortfolioId = "000111000";
+                reportableData.ReturnPct = i;
+                reportableData.AsOfDate = "Some Date";
+                reportableData.LossResultId = 101;
+                var twrSeries = new List<TwrSeriesReportableData>();
+                for (int j = 0; j <= 10; j++)
+                {
+                    var twr = GenerateTwrSeriesReportableData();
+                    twr.AccPeriodBasTwrAtMarketPrice = j;
+                    twrSeries.Add(twr);
+                }
 
-            /*
-            var rootAppender = ((Hierarchy)LogManager.GetRepository())
-                .Root.Appenders.OfType<FileAppender>()
-                .FirstOrDefault();
-            string filename = rootAppender != null ? rootAppender.File : string.Empty;
-            Console.WriteLine("Loss Data Extractor will log to the following file: " + filename);
-            Console.WriteLine("Starting Loss Data Extractor");
-            logger.Info("Starting Loss Data Extractor");
-            Orchestrator.ReportPortfolioBreaches();
-            Console.WriteLine("Loss Data Extraction Complete. Press Enter to close.");
-            logger.Info("Loss Data Extraction Complete.");
-            Console.ReadKey(true);
-            */
+                reportableData.TwrSeries = twrSeries;
+                
+                var nestedObj = new NestedObject();
+                nestedObj.NestedObjectDesc = "Some Desc";
+                nestedObj.NestedObjectValue = 8850;
+                reportableData.NestedObject = nestedObj;
+                toReturn.Add(reportableData);
+            }
+
+            return toReturn;
+        }
+        
+        private static TwrSeriesReportableData GenerateTwrSeriesReportableData()
+        {
+            var twr = new TwrSeriesReportableData();
+            twr.SecId = "SecId";
+            twr.SecName = "SecName";
+            twr.PeriodBasTwr = 200.0;
+            twr.AccPeriodBasTwrAtMarketPrice = 100;
+            twr.EopBasHoldingValueAtMarketPrice = 10.0;
+            return twr;
         }
     }
 }

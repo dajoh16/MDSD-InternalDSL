@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using LossDataExtractor.Data;
+using LossDataExtractor.MetaModel;
 
 namespace LossDataExtractor.Writer
 {
@@ -12,105 +14,168 @@ namespace LossDataExtractor.Writer
         public CSVWriter()
         {
         }
-
-        public void WriteToFile(IEnumerable<ReportableData> results, string path)
-        {
-            Type reportableDataType = typeof(ReportableData);
-            var reportableDataProps = reportableDataType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                
-
-            Type TwrSeriesReportableDataType = typeof(TwrSeriesReportableData);
-            var TwrSeriesReportableProps =
-                TwrSeriesReportableDataType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                
-           
-            using (var writer = new StreamWriter(path))
-            {
-                WriteHeadersToFile(reportableDataProps, TwrSeriesReportableProps, writer);
-
-                foreach (var item in results)
-                {
-                    WriteReportableDataToFile(reportableDataProps, item, TwrSeriesReportableProps, writer);
-                }
-            }
-        }
         
 
-        private void WriteReportableDataToFile(PropertyInfo[] reportableDataProps, ReportableData item,
-            PropertyInfo[] TwrSeriesReportableProps, StreamWriter writer)
+        public void WriteToFile<T>(IEnumerable<T> results, Header model)
         {
-            List<string> content;
-            content = new List<string>();
-            content.AddRange(reportableDataProps.Select(p =>
+            using (var writer = new StreamWriter(model.FileName))
             {
-                if (IsSimple(p.PropertyType))
+                WriteHeadersToFile(model, writer);
+                foreach (var result in results)
                 {
-                    return p.GetValue(item, null).ToString();
+                    WriteEntry(result, model, writer);
                 }
-
-                return null;
-            }));
-
-            foreach (var twrSeriesReportableData in item.TwrSeries)
-            {
-                WriteTwrSeriesReportableDataToFile(content, TwrSeriesReportableProps, twrSeriesReportableData, writer,
-                    reportableDataProps);
             }
         }
 
-        private void WriteTwrSeriesReportableDataToFile(List<string> content, PropertyInfo[] TwrSeriesReportableProps,
-            TwrSeriesReportableData twrSeriesReportableData, StreamWriter writer, PropertyInfo[] reportableDataProps)
+        private void WriteEntry<T>(T result, Header model, StreamWriter writer)
         {
-            content.AddRange(TwrSeriesReportableProps.Select(p =>
+            var root = model.RootObject;
+            var entries = new List<string>();
+            foreach (var rootEntityField in root.EntityFields)
             {
-                if (IsSimple(p.PropertyType))
+                if (rootEntityField is EntityNumberField || rootEntityField is EntityStringField)
                 {
-                    return p.GetValue(twrSeriesReportableData, null).ToString();
+                    Type dataType = typeof(T);
+                    entries.Add(dataType.GetProperty(rootEntityField.FieldName)?.GetValue(result).ToString());
+                } else if (rootEntityField is EntityObject)
+                {
+                    Type dataType = typeof(T);
+                    dynamic nestedObj = dataType.GetProperty(rootEntityField.FieldName)?.GetValue(result);
+                    entries.AddRange(GetObjectEntries((EntityObject) rootEntityField, nestedObj, writer));
+
+                } else if (rootEntityField is EntityList)
+                {
+                    Type dataType = typeof(T);
+                    var list = dataType.GetProperty(rootEntityField.FieldName);
+                    entries.Add(WriteListEntry(entries,list,result, (EntityList) rootEntityField,writer));
                 }
-
-                return null;
-            }));
-            writer.WriteLine(string.Join(";", content.Where(s => !String.IsNullOrEmpty(s))));
-            content.Clear();
-            content.AddRange(
-                reportableDataProps.Select(p =>
-                {
-                    if (IsSimple(p.PropertyType))
-                    {
-                        return " ";
-                    }
-
-                    return null;
-                }));
+            }
+            writer.WriteLine(string.Join(";", entries.Where(s => !String.IsNullOrEmpty(s))));
         }
 
-        private void WriteHeadersToFile(PropertyInfo[] reportableDataProps, PropertyInfo[] TwrSeriesReportableProps,
-            StreamWriter writer)
+        private string WriteListEntry<T>(List<string> rootEntries, PropertyInfo list, T obj, EntityList entityList, StreamWriter writer)
         {
+            var listEntries = new List<string>();
+            foreach (var item in (IEnumerable) list.GetValue(obj, null))
+            { 
+                var entries = new List<string>();
+                //Add Whitespace to the list based on the root entries
+                for (int i = 0; i < rootEntries.Count; i++)
+                {
+                  entries.Add(" ");  
+                }
+                foreach (var field in entityList.EntityFields)
+                {
+                    if (field is EntityNumberField || field is EntityStringField)
+                    {
+                        Type dataType = item.GetType();
+                        entries.Add(dataType.GetProperty(field.FieldName)?.GetValue(item).ToString());
+                    } else if (field is EntityObject)
+                    {
+                        Type dataType = typeof(T);
+                        dynamic nestedObj = dataType.GetProperty(field.FieldName)?.GetValue(item);
+                        entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj, writer));
+                    } else if (field is EntityList)
+                    {
+                        Type dataType = typeof(T);
+                        var listProp = dataType.GetProperty(field.FieldName);
+                        entries.Add(WriteListEntry(entries,listProp,item, (EntityList) field, writer));
+                    }
+                }
+
+                listEntries.Add(string.Join(";", entries.Where(s => !String.IsNullOrEmpty(s))));
+            }
+
+            return "\n" + string.Join("\n", listEntries.Where(s => !String.IsNullOrEmpty(s)));
+        }
+
+        private IEnumerable<string> GetObjectEntries<T>(EntityObject entityObject, T obj, StreamWriter writer)
+        {
+            var entries = new List<string>();
+            foreach (var field in entityObject.EntityFields)
+            {
+                if (field is EntityNumberField || field is EntityStringField)
+                {
+                    Type dataType = typeof(T);
+                    entries.Add(dataType.GetProperty(field.FieldName)?.GetValue(obj).ToString());
+                } else if (field is EntityObject)
+                {
+                    Type dataType = typeof(T);
+                    dynamic nestedObj = dataType.GetProperty(field.FieldName)?.GetValue(obj);
+                    entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj, writer));
+                } else if (field is EntityList)
+                {
+                    Type dataType = typeof(T);
+                    var list = dataType.GetProperty(field.FieldName);
+                    entries.Add(WriteListEntry(entries,list,obj, (EntityList) field,writer));
+                }
+            }
+
+            return entries;
+        }
+
+        private void WriteHeadersToFile(Header model, StreamWriter writer)
+        {
+            var root = model.RootObject;
             List<string> headers = new List<string>();
-            headers.AddRange(reportableDataProps.Select(p =>
+            foreach (var rootEntityField in root.EntityFields)
             {
-                if (IsSimple(p.PropertyType))
+                if (rootEntityField is EntityNumberField || rootEntityField is EntityStringField)
                 {
-                    return p.Name;
-                }
-
-                return null;
-            }));
-
-            headers.AddRange(TwrSeriesReportableProps.Select(p =>
-            {
-                if (IsSimple(p.PropertyType))
+                    headers.Add(rootEntityField.FieldName); 
+                } else if (rootEntityField is EntityObject)
                 {
-                    return p.Name;
+                    headers.AddRange(GetHeaders((EntityObject)rootEntityField));
+                } else if (rootEntityField is EntityList)
+                {
+                    headers.AddRange(GetHeaders((EntityList)rootEntityField));
                 }
-
-                return null;
-            }));
+            }
 
             writer.WriteLine(string.Join(";", headers.Where(s => !String.IsNullOrEmpty(s))));
         }
 
+        private IEnumerable<string> GetHeaders(EntityObject entityObject)
+        {
+            var headers = new List<string>();
+            foreach (var field in entityObject.EntityFields)
+            {
+                if (field is EntityNumberField || field is EntityStringField)
+                {
+                    headers.Add(field.FieldName); 
+                } else if (field is EntityObject)
+                {
+                    headers.AddRange(GetHeaders((EntityObject)field));
+                } else if (field is EntityList)
+                {
+                    headers.AddRange(GetHeaders((EntityList)field));
+                }
+            }
+
+            return headers;
+        }
+
+        private IEnumerable<string> GetHeaders(EntityList entityList)
+        {
+            var headers = new List<string>();
+            foreach (var field in entityList.EntityFields)
+            {
+                if (field is EntityNumberField || field is EntityStringField)
+                {
+                    headers.Add(field.FieldName); 
+                } else if (field is EntityObject)
+                {
+                    headers.AddRange(GetHeaders((EntityObject)field));
+                } else if (field is EntityList)
+                {
+                    headers.AddRange(GetHeaders((EntityList)field));
+                }
+            }
+
+            return headers;
+        }
+       
         private static bool IsSimple(Type type)
         {
             return type.IsPrimitive || type.Equals(typeof(string));

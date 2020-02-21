@@ -2,6 +2,6 @@
 {
     public abstract class EntityField
     {
-        
+        public string FieldName { get; set; }
     }
 }

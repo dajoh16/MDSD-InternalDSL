@@ -4,70 +4,58 @@ using LossDataExtractor.ModelBuilder.Interfaces;
 
 namespace LossDataExtractor.ModelBuilder
 {
-    public class CsvModelBuilder : Builder, ObjectBuilder
+    public class InternalListBuilder : ObjectBuilder
     {
-        private Header root;
-
-        private EntityObject rootObject;
-
-        private List<EntityField> currentFields;
-
-        public static Builder GetBuilder()
+        private ObjectBuilder _parent;
+        private List<EntityField> _currentFields;
+        private EntityList _entityList;
+        
+        
+        public InternalListBuilder(ObjectBuilder parent, string internalListFieldName)
         {
-            return new CsvModelBuilder();
+            this._currentFields = new List<EntityField>();
+            this._parent = parent;
+            this._entityList = new EntityList(internalListFieldName);
         }
 
-        private CsvModelBuilder()
+        public EntityList GetList()
         {
-            
+            return this._entityList;
         }
         
-        public Builder Header(string CsvFileName)
-        {
-            root = new Header(CsvFileName);
-            return this;
-        }
-
-        public ObjectBuilder Object()
-        {   
-            rootObject = new EntityObject();
-            root.RootObject = rootObject;
-            currentFields = new List<EntityField>();
-            return this;
-        }
-
         public ObjectBuilder Object(string FieldName)
         {
             var objectBuilder = new InternalObjectBuilder(this, FieldName);
-            currentFields.Add(objectBuilder.getObject());
+            _currentFields.Add(objectBuilder.getObject());
             return objectBuilder;
         }
 
         public ObjectBuilder String(string FieldName)
         {
             var stringField = new EntityStringField(FieldName);
-            currentFields.Add(stringField);
+            _currentFields.Add(stringField);
             return this;
         }
 
         public ObjectBuilder Number(string FieldName)
         {
             var numberField = new EntityNumberField(FieldName);
-            currentFields.Add(numberField);
+            _currentFields.Add(numberField);
             return this;
         }
 
         public ObjectBuilder List(string FieldName)
         {
             var builder = new InternalListBuilder(this,FieldName);
-            currentFields.Add(builder.GetList());
+            _currentFields.Add(builder.GetList());
             return builder;
         }
 
+        
         public Header Build()
         {
-            root.RootObject.EntityFields = currentFields;
-            return root;
+            _entityList.EntityFields = _currentFields;
+            return _parent.Build();
         }
     }
 }

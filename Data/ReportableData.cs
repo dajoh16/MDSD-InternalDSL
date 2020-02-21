@@ -13,6 +13,8 @@ namespace LossDataExtractor.Data
 
         public string AsOfDate { get; set; }
         public double ReturnPct { get; set; }
+        
+        public NestedObject NestedObject { get; set; }
         public List<TwrSeriesReportableData> TwrSeries { get; set; }
 
     }

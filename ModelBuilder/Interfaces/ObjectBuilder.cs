@@ -25,11 +25,7 @@ namespace LossDataExtractor.ModelBuilder.Interfaces
          * After calling this method explicit Fields of String, Number or Object can be written out from the list objects
         */
         ObjectBuilder List(string FieldName);
-        /*
-         * End the List.
-         */
-        ObjectBuilder EndList(string FieldName);
-        /*
+       /*
          * Build the metamodel.
          * Returns the root object of the model.
          */
