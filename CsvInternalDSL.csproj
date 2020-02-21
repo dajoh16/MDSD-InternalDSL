@@ -57,7 +57,6 @@
     <Compile Include="Data\NestedObject.cs" />
     <Compile Include="Data\ReportableData.cs" />
     <Compile Include="Data\TwrSeriesReportableData.cs" />
-    <Compile Include="LogFactory.cs" />
     <Compile Include="MetaModel\EntityField.cs" />
     <Compile Include="MetaModel\EntityList.cs" />
     <Compile Include="MetaModel\EntityNumberField.cs" />
@@ -77,11 +76,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="log4net.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -15,7 +15,6 @@ namespace LossDataExtractor
 {
     internal class Program
     {
-        private static ILog logger = LogFactory.GetLogInstance("MAIN");
         public static void Main(string[] args)
         {
             var builder = CsvModelBuilder.GetBuilder();

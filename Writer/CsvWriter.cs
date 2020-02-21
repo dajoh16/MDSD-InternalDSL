@@ -175,12 +175,6 @@ namespace LossDataExtractor.Writer
 
             return headers;
         }
-       
-        private static bool IsSimple(Type type)
-        {
-            return type.IsPrimitive || type.Equals(typeof(string));
-        }
-   
     }
     
 }
