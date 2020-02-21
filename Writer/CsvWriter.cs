@@ -42,19 +42,19 @@ namespace LossDataExtractor.Writer
                 {
                     Type dataType = typeof(T);
                     dynamic nestedObj = dataType.GetProperty(rootEntityField.FieldName)?.GetValue(result);
-                    entries.AddRange(GetObjectEntries((EntityObject) rootEntityField, nestedObj, writer));
+                    entries.AddRange(GetObjectEntries((EntityObject) rootEntityField, nestedObj));
 
                 } else if (rootEntityField is EntityList)
                 {
                     Type dataType = typeof(T);
                     var list = dataType.GetProperty(rootEntityField.FieldName);
-                    entries.Add(WriteListEntry(entries,list,result, (EntityList) rootEntityField,writer));
+                    entries.Add(WriteListEntry(entries,list,result, (EntityList) rootEntityField));
                 }
             }
             writer.WriteLine(string.Join(";", entries.Where(s => !String.IsNullOrEmpty(s))));
         }
 
-        private string WriteListEntry<T>(List<string> rootEntries, PropertyInfo list, T obj, EntityList entityList, StreamWriter writer)
+        private string WriteListEntry<T>(List<string> rootEntries, PropertyInfo list, T obj, EntityList entityList)
         {
             var listEntries = new List<string>();
             foreach (var item in (IEnumerable) list.GetValue(obj, null))
@@ -75,12 +75,12 @@ namespace LossDataExtractor.Writer
                     {
                         Type dataType = item.GetType();
                         dynamic nestedObj = dataType.GetProperty(field.FieldName)?.GetValue(item);
-                        entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj, writer));
+                        entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj));
                     } else if (field is EntityList)
                     {
                         Type dataType = item.GetType();
                         var listProp = dataType.GetProperty(field.FieldName);
-                        entries.Add(WriteListEntry(entries,listProp,item, (EntityList) field, writer));
+                        entries.Add(WriteListEntry(entries,listProp,item, (EntityList) field));
                     }
                 }
 
@@ -90,7 +90,7 @@ namespace LossDataExtractor.Writer
             return "\n" + string.Join("\n", listEntries.Where(s => !String.IsNullOrEmpty(s)));
         }
 
-        private IEnumerable<string> GetObjectEntries<T>(EntityObject entityObject, T obj, StreamWriter writer)
+        private IEnumerable<string> GetObjectEntries<T>(EntityObject entityObject, T obj)
         {
             var entries = new List<string>();
             foreach (var field in entityObject.EntityFields)
@@ -103,12 +103,12 @@ namespace LossDataExtractor.Writer
                 {
                     Type dataType = typeof(T);
                     dynamic nestedObj = dataType.GetProperty(field.FieldName)?.GetValue(obj);
-                    entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj, writer));
+                    entries.AddRange(GetObjectEntries((EntityObject) field, nestedObj));
                 } else if (field is EntityList)
                 {
                     Type dataType = typeof(T);
                     var list = dataType.GetProperty(field.FieldName);
-                    entries.Add(WriteListEntry(entries,list,obj, (EntityList) field,writer));
+                    entries.Add(WriteListEntry(entries,list,obj, (EntityList) field));
                 }
             }
 
